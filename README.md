@@ -48,7 +48,8 @@ src/
     globals.css             paleta, filetes de la rejilla, reglas @media print
     api/revalidate/route.ts purga de caché que llama el backend
   components/
-    Toolbar.tsx             barra fija + Imprimir/PDF
+    Toolbar.tsx             barra fija + cambio de tema + Imprimir/PDF
+    BotonTema.tsx           conmuta negro / blanco y lo recuerda
     Masthead.tsx            logotipo y subtítulo
     Chapter.tsx             una sección con su encabezado y su rejilla
     ProductCard.tsx         tarjeta: carrusel, tallas, «Agregar» y «Consultar»
@@ -57,6 +58,7 @@ src/
     WhatsAppButton.tsx      botón flotante de contacto
     Footer.tsx
   lib/api.ts                fetch del catálogo con caché
+  lib/tema.ts               clave, tema por defecto y script anti-destello
   lib/carrito.tsx           store del carrito sobre localStorage
   lib/whatsapp.ts           armado de enlaces y mensajes wa.me
   types/catalogo.ts
@@ -64,13 +66,38 @@ src/
 
 ## Detalles de maquetación
 
-- **Filetes de la rejilla**: cada tarjeta lleva `outline: 1px`; como el hueco entre celdas
-  también es de 1px, los outlines vecinos coinciden y se ven como una línea sola.
-  (El mockup original pintaba el fondo de la rejilla y dejaba que asomara por los huecos,
-  pero eso deja bloques grises cuando la última fila está incompleta.)
+- **Filetes de la rejilla**: cada tarjeta lleva su `outline: 1px` y entre ellas hay un hueco
+  de 14px, así que cada prenda se lee como una ficha suelta. (El mockup original pintaba el
+  fondo de la rejilla y dejaba que asomara por los huecos, pero eso deja bloques grises
+  cuando la última fila está incompleta.) Al imprimir el hueco pasa a 0 para no desperdiciar
+  papel.
 - **Numeración** «N.º 01, 02…» es continua a través de las secciones.
 - **Imágenes locales**: Next 16 bloquea optimizar imágenes de hosts locales.
   `next.config.ts` activa `dangerouslyAllowLocalIP` sólo cuando el host de la API es local.
+
+## Tema (negro / blanco)
+
+El botón «Claro / Oscuro» de la barra escribe `data-tema` en `<html>` y guarda la elección
+en `localStorage` (`amelia_tema_v1`). Sin atributo manda el tema oscuro, el del maquetado
+original; el claro sólo reescribe las variables de color en `globals.css`, así que cualquier
+componente nuevo que use los tokens (`bg-paper`, `text-ink`, `border-line`…) funciona en los
+dos sin tocarlo.
+
+Tres detalles que costaron una iteración cada uno:
+
+- **Sin destello al recargar**: el tema se aplica con un script en línea bloqueante
+  (`SCRIPT_TEMA` en `src/lib/tema.ts`), antes del primer pintado. Vive en un módulo sin
+  `'use client'` porque `layout.tsx` es un componente de servidor: importar la constante
+  desde el componente cliente mete una referencia al cliente en el `<script>`, no la cadena.
+- **`data-tema` no se declara en el JSX de `<html>`**: si React lo renderiza lo considera
+  suyo y al hidratar lo devuelve al valor del servidor, borrando el tema guardado.
+- **El logotipo se invierte** en el tema claro (`.logo-marca`, `filter: invert(1)`): al ser
+  monocromo, el trazo claro sobre negro se vuelve trazo oscuro sobre blanco y no hace falta
+  un segundo archivo. Va con `unoptimized` para que el negro llegue exacto y el recuadro
+  desaparezca contra la página.
+
+`BotonTema` lee el DOM con `useSyncExternalStore` (igual que el carrito lee localStorage) y
+escucha el evento `storage`, así que cambiar el tema en una pestaña pone al día las demás.
 
 ## Contacto y lista de consulta
 
@@ -95,17 +122,24 @@ estática, sin desajustes.
 
 - Una misma prenda en dos tallas son dos líneas distintas.
 - La talla se elige pulsando los chips de la tarjeta; volver a pulsarla la deselecciona.
+- Cada línea guarda una **miniatura** (`imagen`): la foto que estaba a la vista al agregar,
+  no la portada, para que se reconozca lo que se eligió. Los carritos guardados antes de
+  este campo se leen igual — `leerGuardado()` los normaliza a `imagen: null` y la línea
+  muestra la marca de agua.
 - **Total de referencia**: sólo se muestra y se envía si *todas* las prendas tienen precio
   exacto. Con un rango (25 – 30) cualquier suma sería inventada, así que se omite y el
   mensaje pide que la boutique confirme el valor.
 
 ## Logotipo
 
-`Masthead.tsx` muestra el nombre compuesto en Cormorant. Para usar el logotipo real:
+Se sube desde el panel del backend, en **Ajustes → Logotipo de la cabecera**. La API lo
+devuelve en `logo_url` con sus dimensiones (`logo_ancho`, `logo_alto`), que `Masthead.tsx`
+pasa a `next/image` para reservar el espacio sin salto de maquetado.
 
-1. Guarda el archivo en `public/logo.png` (o `.jpg` / `.svg`).
-2. En `src/components/Masthead.tsx` cambia `const LOGO_SRC = null` por `'/logo.png'`
-   y ajusta `LOGO_ANCHO` / `LOGO_ALTO` a sus dimensiones reales.
+- El archivo se guarda como PNG con transparencia en el disco `public` de Laravel
+  (`/storage/marca/…`), así que lo cubre el `remotePatterns` de `next.config.ts`.
+- Sin logotipo subido (`logo_url: null`), `Masthead.tsx` escribe «Amelia · Boutique» en
+  Cormorant como respaldo.
 
 ## Imprimir
 

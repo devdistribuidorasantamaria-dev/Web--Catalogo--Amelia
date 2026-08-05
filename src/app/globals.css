@@ -2,7 +2,9 @@
 
 /*
  * Paleta y tipografía tomadas del maquetado original de Amelia Boutique.
- * El catálogo es intencionalmente monocromo: no hay variante clara.
+ * El catálogo es monocromo: sólo cambia de negro a blanco con el botón de tema,
+ * nunca hay color. Los valores de abajo son el tema oscuro (el de origen); el
+ * claro los reescribe más abajo en `html[data-tema='claro']`.
  */
 @theme {
   --color-paper: #000000;
@@ -11,6 +13,8 @@
   --color-muted: #8f8f8f;
   --color-panel: #0e0e0e;
   --color-hairline: #3a3a3a;
+  /* Marca de agua de las prendas sin foto: apenas se despega del fondo. */
+  --color-marca-agua: #242424;
 
   --font-serif: var(--font-cormorant), "Didot", Georgia, serif;
   --font-sans: var(--font-jost), "Helvetica Neue", Arial, sans-serif;
@@ -18,6 +22,26 @@
   --tracking-eyebrow: 0.34em;
   --tracking-chapter: 0.42em;
   --tracking-label: 0.18em;
+}
+
+/*
+ * Tema claro. Se activa con `data-tema="claro"` en <html>, que pone el botón de
+ * la barra (y el script en línea de `layout.tsx`, antes del primer pintado, para
+ * que no haya destello del tema equivocado al recargar).
+ *
+ * Va fuera de `@theme` a propósito: `@theme` sólo declara los valores por
+ * defecto en `:root`, y las utilidades de Tailwind los leen con `var()`. Basta
+ * reescribir las variables en un selector más específico para invertir la hoja.
+ */
+html[data-tema='claro'] {
+  --color-paper: #ffffff;
+  --color-ink: #14120f;
+  --color-line: #e2e0da;
+  --color-muted: #6b6b6b;
+  --color-panel: #f5f4f1;
+  --color-hairline: #cfcdc6;
+  --color-marca-agua: #e6e4de;
+  color-scheme: light;
 }
 
 @layer base {
@@ -61,19 +85,19 @@
   }
 
   /*
-   * Rejilla del catálogo. Los filetes se dibujan con un `outline` de 1px en cada
-   * tarjeta: como el hueco entre celdas también es de 1px, los outlines vecinos
-   * coinciden y se ven como una sola línea.
+   * Rejilla del catálogo. Cada tarjeta lleva su propio filete de 1px (`outline`
+   * en .catalog-card) y entre ellas queda un hueco: así cada prenda se lee como
+   * una ficha suelta, con aire alrededor de la foto, el precio y las tallas.
    *
    * El maquetado original pintaba el fondo de la rejilla con --line y dejaba que
    * asomara por los huecos. Eso funciona sólo si la última fila está completa: una
    * sección con 1 ó 2 prendas deja bloques grises enormes. Con outlines, las celdas
-   * vacías simplemente quedan en negro.
+   * vacías simplemente quedan en el color de la página.
    */
   .catalog-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 1px;
+    gap: 14px;
     margin-bottom: 40px;
   }
 
@@ -101,7 +125,16 @@
   font-style: italic;
   font-size: 22px;
   letter-spacing: 0.14em;
-  color: #242424;
+  color: var(--color-marca-agua);
+}
+
+/*
+ * El logotipo se sube pensado para el fondo negro (trazo claro). Al ser
+ * monocromo, invertirlo en el tema claro da exactamente el trazo oscuro sobre
+ * blanco, sin pedirle al cliente un segundo archivo.
+ */
+html[data-tema='claro'] .logo-marca {
+  filter: invert(1);
 }
 
 @media print {

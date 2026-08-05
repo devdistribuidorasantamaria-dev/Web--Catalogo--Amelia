@@ -9,6 +9,9 @@ export const CATALOGO_TAG = 'catalogo';
 
 const CATALOGO_VACIO: Catalogo = {
   subtitulo: 'Colección · Santo Domingo, Ecuador',
+  logo_url: null,
+  logo_ancho: null,
+  logo_alto: null,
   whatsapp_url: null,
   whatsapp_numero: null,
   total_prendas: 0,

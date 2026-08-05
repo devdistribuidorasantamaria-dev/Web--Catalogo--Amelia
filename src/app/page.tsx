@@ -24,7 +24,12 @@ export default async function CatalogoPage() {
   return (
     <>
       <Toolbar />
-      <Masthead subtitulo={catalogo.subtitulo} />
+      <Masthead
+        subtitulo={catalogo.subtitulo}
+        logoUrl={catalogo.logo_url}
+        logoAncho={catalogo.logo_ancho}
+        logoAlto={catalogo.logo_alto}
+      />
 
       <main className="wrap">
         {catalogo.bloques.length === 0 ? (

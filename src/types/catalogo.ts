@@ -25,6 +25,11 @@ export type Bloque = {
 
 export type Catalogo = {
   subtitulo: string;
+  /** Logotipo subido en el panel; null = se escribe el nombre en Cormorant. */
+  logo_url: string | null;
+  /** Dimensiones reales del archivo, para que next/image reserve el espacio. */
+  logo_ancho: number | null;
+  logo_alto: number | null;
   /** Enlace wa.me armado por el backend; null si no hay número configurado. */
   whatsapp_url: string | null;
   /** Número en dígitos, para armar mensajes propios (prenda, carrito). */
@@ -38,6 +43,12 @@ export type ItemCarrito = {
   nombre: string;
   /** Talla elegida en la tarjeta; null si la prenda no tiene tallas. */
   talla: string | null;
+  /**
+   * Foto que estaba a la vista al agregar, para reconocer la prenda en la lista.
+   * null si la prenda no tiene fotos o si el item viene de un carrito guardado
+   * antes de que existiera este campo.
+   */
+  imagen: string | null;
   precioTexto: string;
   /** Se usa para el total de referencia: sólo si no es un rango. */
   precioExacto: number | null;

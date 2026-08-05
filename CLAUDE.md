@@ -13,9 +13,14 @@ Lee `README.md` para el arranque, las variables y los detalles de maquetación.
   `talla`, `precio`). El código y las APIs de framework quedan en inglés.
 - La escritura (crear/editar/borrar prendas) vive **sólo** en el panel Blade del backend.
   No agregues formularios de edición aquí.
-- El diseño es monocromo a propósito: no hay variante clara ni `prefers-color-scheme`.
-  La paleta vive en `@theme` de `src/app/globals.css` (`paper`, `ink`, `line`, `muted`,
-  `panel`, `hairline`) — usa esos tokens, no hexadecimales sueltos.
+- El diseño es monocromo a propósito: sólo negro o blanco, nunca color. La paleta vive en
+  `@theme` de `src/app/globals.css` (`paper`, `ink`, `line`, `muted`, `panel`, `hairline`,
+  `marca-agua`) — usa esos tokens, no hexadecimales sueltos, o el tema claro te queda roto.
+- El tema lo elige el visitante con el botón de la barra (`BotonTema.tsx`): escribe
+  `data-tema="claro"` en `<html>` y `globals.css` reescribe ahí las variables. Sin atributo
+  = tema oscuro. No hay `prefers-color-scheme`: la marca abre en negro a propósito.
+  Excepción a los tokens: los controles que van **encima de una foto** (`N.º`, flechas,
+  puntos) siguen en blanco/negro fijos, porque no dependen del fondo de la página.
 - Todo lo que no debe imprimirse lleva la clase `.no-print`.
 - Datos del catálogo: siempre por `getCatalogo()` en `src/lib/api.ts` (cachea con
   `'use cache'` + `cacheTag('catalogo')`). Si agregas otro fetch cacheado, etiquétalo con

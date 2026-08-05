@@ -36,14 +36,20 @@ function leerGuardado(): ItemCarrito[] {
     }
 
     // Se filtra por si quedó guardado algo con un formato anterior.
-    return datos.filter(
-      (item): item is ItemCarrito =>
-        typeof item === 'object' &&
-        item !== null &&
-        typeof (item as ItemCarrito).prendaId === 'number' &&
-        typeof (item as ItemCarrito).nombre === 'string' &&
-        typeof (item as ItemCarrito).cantidad === 'number',
-    );
+    return datos
+      .filter(
+        (item): item is ItemCarrito =>
+          typeof item === 'object' &&
+          item !== null &&
+          typeof (item as ItemCarrito).prendaId === 'number' &&
+          typeof (item as ItemCarrito).nombre === 'string' &&
+          typeof (item as ItemCarrito).cantidad === 'number',
+      )
+      // Los carritos guardados antes de la miniatura no traen `imagen`.
+      .map((item) => ({
+        ...item,
+        imagen: typeof item.imagen === 'string' ? item.imagen : null,
+      }));
   } catch {
     return VACIO;
   }

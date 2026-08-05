@@ -1,28 +1,40 @@
 import Image from 'next/image';
 
+type Props = {
+  subtitulo: string;
+  /** URL del logotipo subido en el panel (Ajustes); null = respaldo en texto. */
+  logoUrl: string | null;
+  logoAncho: number | null;
+  logoAlto: number | null;
+};
+
+/** Ancho al que se muestra el logotipo cuando no cabe el 62% de la columna. */
+const LOGO_ANCHO_MAX = 360;
+
 /**
  * Cabecera del catálogo.
  *
- * Para usar el logotipo real de la boutique, guarda el archivo en
- * `public/logo.png` (o .jpg/.svg) y apunta LOGO_SRC ahí. Mientras sea `null`
- * se muestra el nombre compuesto en Cormorant, con el mismo peso visual.
+ * El logotipo se administra desde el panel del backend (Ajustes → Logotipo de la
+ * cabecera). Mientras no haya archivo subido se escribe el nombre compuesto en
+ * Cormorant, con el mismo peso visual.
  */
-const LOGO_SRC: string | null = null;
-const LOGO_ANCHO = 360;
-const LOGO_ALTO = 120;
-
-export default function Masthead({ subtitulo }: { subtitulo: string }) {
+export default function Masthead({ subtitulo, logoUrl, logoAncho, logoAlto }: Props) {
   return (
     <header className="pb-[30px] pt-14 text-center">
       <div className="wrap">
-        {LOGO_SRC ? (
+        {logoUrl ? (
           <Image
-            src={LOGO_SRC}
+            src={logoUrl}
             alt="Amelia Boutique"
-            width={LOGO_ANCHO}
-            height={LOGO_ALTO}
+            width={logoAncho ?? LOGO_ANCHO_MAX}
+            height={logoAlto ?? 120}
             priority
-            className="mx-auto h-auto w-[62%] max-w-[360px]"
+            // Sin optimizar: pesa pocos KB y así el negro del fondo llega exacto,
+            // que es lo que hace que el recuadro desaparezca contra la página en
+            // los dos temas (en el claro se invierte a blanco puro).
+            unoptimized
+            // .logo-marca lo invierte en el tema claro (ver globals.css).
+            className="logo-marca mx-auto h-auto w-[62%] max-w-[360px]"
           />
         ) : (
           <div className="mx-auto max-w-[360px]">

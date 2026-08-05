@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useEffect, useState } from 'react';
 
 import {
@@ -109,7 +110,25 @@ export default function CartPanel({ whatsappNumero }: { whatsappNumero: string |
             ) : (
               <ul className="flex-1 divide-y divide-line overflow-y-auto">
                 {items.map((item) => (
-                  <li key={`${item.prendaId}|${item.talla ?? ''}`} className="px-6 py-4">
+                  <li key={`${item.prendaId}|${item.talla ?? ''}`} className="flex gap-3.5 px-6 py-4">
+                    {/* Miniatura para reconocer de un vistazo lo que se eligió. */}
+                    <div className="relative h-[76px] w-[57px] shrink-0 overflow-hidden border border-line bg-panel">
+                      {item.imagen ? (
+                        <Image
+                          src={item.imagen}
+                          alt={item.nombre}
+                          fill
+                          sizes="57px"
+                          className="object-cover"
+                        />
+                      ) : (
+                        <span className="flex h-full w-full items-center justify-center font-serif text-[9px] italic tracking-[0.14em] text-muted">
+                          AMELIA
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="min-w-0 flex-1">
                     <div className="flex items-baseline justify-between gap-3">
                       <h3 className="m-0 font-serif text-lg leading-tight">{item.nombre}</h3>
                       <span className="whitespace-nowrap font-serif text-lg">
@@ -149,6 +168,7 @@ export default function CartPanel({ whatsappNumero }: { whatsappNumero: string |
                       >
                         Quitar
                       </button>
+                    </div>
                     </div>
                   </li>
                 ))}

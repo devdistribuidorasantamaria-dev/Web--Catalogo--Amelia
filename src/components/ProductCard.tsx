@@ -48,6 +48,8 @@ export default function ProductCard({
       prendaId: prenda.id,
       nombre: prenda.nombre,
       talla,
+      // La foto que está a la vista, no la portada: es la que acaba de mirar.
+      imagen: fotos[indice] ?? null,
       precioTexto: prenda.precio_texto,
       precioExacto: precioExacto(prenda),
     });
