@@ -48,7 +48,7 @@ src/
     globals.css             paleta, filetes de la rejilla, reglas @media print
     api/revalidate/route.ts purga de caché que llama el backend
   components/
-    Toolbar.tsx             barra fija + cambio de tema + Imprimir/PDF
+    Toolbar.tsx             barra fija: logotipo, secciones, tema, Imprimir/PDF
     BotonTema.tsx           conmuta negro / blanco y lo recuerda
     Masthead.tsx            logotipo y subtítulo
     Chapter.tsx             una sección con su encabezado y su rejilla
@@ -58,6 +58,7 @@ src/
     WhatsAppButton.tsx      botón flotante de contacto
     Footer.tsx
   lib/api.ts                fetch del catálogo con caché
+  lib/anclas.ts             ids de las secciones (los usan barra y capítulos)
   lib/tema.ts               clave, tema por defecto y script anti-destello
   lib/carrito.tsx           store del carrito sobre localStorage
   lib/whatsapp.ts           armado de enlaces y mensajes wa.me
@@ -72,6 +73,14 @@ src/
   cuando la última fila está incompleta.) Al imprimir el hueco pasa a 0 para no desperdiciar
   papel.
 - **Numeración** «N.º 01, 02…» es continua a través de las secciones.
+- **Barra superior**: logotipo a la izquierda (vuelve al inicio) y un enlace por sección con
+  prendas, que salta a su `id` (`seccion-<slug>`, armado en `src/lib/anclas.ts`). El salto es
+  suave salvo con `prefers-reduced-motion`, y `.seccion-anclada` deja el hueco de la barra
+  fija: 72px, 105px bajo 640px, donde la barra pasa a dos líneas para que las secciones no
+  queden recortadas.
+- `anclaSeccion()` vive en `lib/`, no en `Toolbar.tsx`: `Chapter` es un componente de
+  servidor y llamar a una función exportada desde un módulo `'use client'` revienta en
+  ejecución («Attempted to call anclaSeccion() from the server»). No lo ve ni tsc ni eslint.
 - **Imágenes locales**: Next 16 bloquea optimizar imágenes de hosts locales.
   `next.config.ts` activa `dangerouslyAllowLocalIP` sólo cuando el host de la API es local.
 

@@ -5,6 +5,7 @@ import FloatingActions from '@/components/FloatingActions';
 import Footer from '@/components/Footer';
 import Masthead from '@/components/Masthead';
 import Toolbar from '@/components/Toolbar';
+import { ANCLA_INICIO } from '@/lib/anclas';
 import { CATALOGO_TAG, getCatalogo } from '@/lib/api';
 
 export default async function CatalogoPage() {
@@ -21,9 +22,23 @@ export default async function CatalogoPage() {
   // como en el maquetado original.
   let correlativo = 1;
 
+  // Las secciones de la barra son las que de verdad tienen prendas: los bloques
+  // vacíos no se renderizan, así que un enlace a ellos no llevaría a ningún lado.
+  const secciones = catalogo.bloques
+    .map((bloque) => bloque.seccion)
+    .filter((seccion) => seccion !== null);
+
   return (
     <>
-      <Toolbar />
+      <Toolbar
+        logoUrl={catalogo.logo_url}
+        logoAncho={catalogo.logo_ancho}
+        logoAlto={catalogo.logo_alto}
+        secciones={secciones}
+      />
+
+      <span id={ANCLA_INICIO} />
+
       <Masthead
         subtitulo={catalogo.subtitulo}
         logoUrl={catalogo.logo_url}

@@ -1,4 +1,5 @@
 import ProductCard from '@/components/ProductCard';
+import { anclaSeccion } from '@/lib/anclas';
 import type { Bloque } from '@/types/catalogo';
 
 type Props = {
@@ -12,7 +13,12 @@ type Props = {
 
 export default function Chapter({ bloque, desde, whatsappNumero, primero = false }: Props) {
   return (
-    <section className="mt-2">
+    // El id es el destino de los enlaces de la barra; `seccion-anclada` deja
+    // hueco arriba para que el encabezado no quede tapado por la barra fija.
+    <section
+      className="seccion-anclada mt-2"
+      id={bloque.seccion ? anclaSeccion(bloque.seccion.slug) : undefined}
+    >
       {bloque.seccion ? (
         <div className="chapter-head pb-6 pt-[46px] text-center">
           <span className="mb-3 block text-[10px] uppercase tracking-chapter text-muted">
