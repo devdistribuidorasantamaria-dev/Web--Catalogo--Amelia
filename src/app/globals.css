@@ -89,13 +89,13 @@ html[data-tema='claro'] {
    * sección queda debajo de la barra fija (60px) al llegar.
    */
   .seccion-anclada {
-    scroll-margin-top: 72px;
+    scroll-margin-top: 80px;
   }
 
-  /* Bajo 640px la barra usa dos líneas (93px), así que tapa más. */
+  /* Bajo 640px la barra usa dos líneas, así que tapa más. */
   @media (max-width: 639px) {
     .seccion-anclada {
-      scroll-margin-top: 105px;
+      scroll-margin-top: 116px;
     }
   }
 

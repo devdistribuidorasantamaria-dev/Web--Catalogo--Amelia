@@ -73,11 +73,12 @@ src/
   cuando la última fila está incompleta.) Al imprimir el hueco pasa a 0 para no desperdiciar
   papel.
 - **Numeración** «N.º 01, 02…» es continua a través de las secciones.
-- **Barra superior**: logotipo a la izquierda (vuelve al inicio) y un enlace por sección con
-  prendas, que salta a su `id` (`seccion-<slug>`, armado en `src/lib/anclas.ts`). El salto es
-  suave salvo con `prefers-reduced-motion`, y `.seccion-anclada` deja el hueco de la barra
-  fija: 72px, 105px bajo 640px, donde la barra pasa a dos líneas para que las secciones no
-  queden recortadas.
+- **Barra superior**: va de filo a filo (no usa `wrap`, a diferencia del catálogo, que sigue
+  centrado en 1120px), con el logotipo pegado al borde izquierdo y los botones al derecho.
+  Lleva un enlace por sección con prendas, que salta a su `id` (`seccion-<slug>`, armado en
+  `src/lib/anclas.ts`). El salto es suave salvo con `prefers-reduced-motion`, y
+  `.seccion-anclada` deja el hueco de la barra fija: 80px, 116px bajo 640px, donde la barra
+  pasa a dos líneas para que las secciones no queden recortadas.
 - `anclaSeccion()` vive en `lib/`, no en `Toolbar.tsx`: `Chapter` es un componente de
   servidor y llamar a una función exportada desde un módulo `'use client'` revienta en
   ejecución («Attempted to call anclaSeccion() from the server»). No lo ve ni tsc ni eslint.
