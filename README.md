@@ -46,6 +46,9 @@ src/
     layout.tsx              fuentes Cormorant + Jost (self-hosted), metadata
     page.tsx                catálogo completo (server component)
     globals.css             paleta, filetes de la rejilla, reglas @media print
+    favicon.ico             la «A» del logotipo, 16/32/48
+    icon.png                512, para pestañas y marcadores
+    apple-icon.png          180, para la pantalla de inicio de iOS
     api/revalidate/route.ts purga de caché que llama el backend
   components/
     Toolbar.tsx             barra fija: logotipo, secciones, tema, Imprimir/PDF
@@ -65,6 +68,7 @@ src/
   lib/whatsapp.ts           armado de enlaces y mensajes wa.me
   lib/analitica.ts          envío de los eventos anónimos al backend
   types/catalogo.ts
+scripts/generar-iconos.php  recorta la «A» del logotipo y escribe los iconos
 ```
 
 ## Detalles de maquetación
@@ -152,6 +156,32 @@ pasa a `next/image` para reservar el espacio sin salto de maquetado.
   (`/storage/marca/…`), así que lo cubre el `remotePatterns` de `next.config.ts`.
 - Sin logotipo subido (`logo_url: null`), `Masthead.tsx` escribe «Amelia · Boutique» en
   Cormorant como respaldo.
+
+## Icono del navegador
+
+`src/app/` lleva los tres archivos que Next detecta por el nombre y convierte solo en
+etiquetas `<link>`: `favicon.ico` (16/32/48), `icon.png` (512) y `apple-icon.png` (180).
+
+Salen del logotipo de la marca, pero **no del logotipo entero**: es un wordmark apaisado
+de 472×247 y encogido a 16 px sería una mancha. Se recorta la «A» manuscrita, centrada
+sobre el cuadrado negro de la marca. Para regenerarlos si el cliente cambia el logotipo:
+
+```bash
+php scripts/generar-iconos.php ../amelia-backend/storage/app/public/marca/<archivo>.png /tmp/tira.png
+```
+
+El segundo argumento es opcional y dibuja una tira de control con el icono a 16, 24, 32,
+48, 64 y 128 px sobre fondo claro y oscuro, para comprobar de un vistazo que la «A» se
+sigue leyendo. Dos cosas que el script resuelve y conviene no deshacer:
+
+- El trazo se **engrosa sólo a 16 px**. Es una letra manuscrita muy fina y a ese tamaño
+  ocupa menos de un píxel; de 24 px en adelante engrosarla la vuelve tosca.
+- Los PNG se guardan en **RGBA** aunque el icono sea opaco: Next rechaza los iconos que no
+  traigan canal alfa con «The PNG is not in RGBA format!».
+
+El script está en PHP porque el logotipo vive en el backend Laravel y GD ya es un
+requisito de ese proyecto; el frontend no tiene ninguna dependencia de imágenes y no valía
+la pena añadirle una para esto.
 
 ## Analítica
 

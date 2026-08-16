@@ -22,6 +22,9 @@ Lee `README.md` para el arranque, las variables y los detalles de maquetación.
   Excepción a los tokens: los controles que van **encima de una foto** (`N.º`, flechas,
   puntos) siguen en blanco/negro fijos, porque no dependen del fondo de la página.
 - Todo lo que no debe imprimirse lleva la clase `.no-print`.
+- Los iconos de `src/app/` (`favicon.ico`, `icon.png`, `apple-icon.png`) se generan, no se
+  editan a mano: `php scripts/generar-iconos.php <logotipo.png>`. Salen de la «A» del
+  logotipo, no del wordmark entero, que a 16 px es ilegible.
 - Datos del catálogo: siempre por `getCatalogo()` en `src/lib/api.ts` (cachea con
   `'use cache'` + `cacheTag('catalogo')`). Si agregas otro fetch cacheado, etiquétalo con
   `CATALOGO_TAG` para que el backend también lo purgue.
