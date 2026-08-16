@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
 
+import { registrarEvento } from '@/lib/analitica';
 import { agregarAlCarrito } from '@/lib/carrito';
 import { enlaceWhatsapp, mensajePrenda, precioExacto } from '@/lib/whatsapp';
 import type { Prenda } from '@/types/catalogo';
@@ -44,6 +45,8 @@ export default function ProductCard({
   const consultar = enlaceWhatsapp(whatsappNumero, mensajePrenda(prenda, talla));
 
   const alAgregar = () => {
+    registrarEvento('agregar', prenda.id);
+
     agregarAlCarrito({
       prendaId: prenda.id,
       nombre: prenda.nombre,
@@ -194,6 +197,8 @@ export default function ProductCard({
               href={consultar}
               target="_blank"
               rel="noopener noreferrer"
+              // Sin preventDefault: el enlace a wa.me se abre igual que siempre.
+              onClick={() => registrarEvento('consultar', prenda.id)}
               className="btn flex-1 !px-2 !py-2.5 !text-[10px]"
             >
               Consultar

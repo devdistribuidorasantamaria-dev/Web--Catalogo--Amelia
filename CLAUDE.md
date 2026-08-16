@@ -25,6 +25,10 @@ Lee `README.md` para el arranque, las variables y los detalles de maquetación.
 - Datos del catálogo: siempre por `getCatalogo()` en `src/lib/api.ts` (cachea con
   `'use cache'` + `cacheTag('catalogo')`). Si agregas otro fetch cacheado, etiquétalo con
   `CATALOGO_TAG` para que el backend también lo purgue.
+- Analítica: los eventos salen por `registrarEvento()` de `src/lib/analitica.ts`, nunca con
+  un `fetch` suelto. Dispara y se olvida — nada de `await`, de estado ni de `preventDefault`
+  en los botones que ya hacían algo. Si agregas un punto de contacto nuevo, añade su tipo
+  también a `App\Enums\TipoEvento` del backend.
 - La invalidación necesita `revalidateTag(CATALOGO_TAG, 'max')` **y** `revalidatePath(...)`:
   la etiqueta sola no purga la HTML prerenderizada de la ruta. Si agregas rutas cacheadas
   que muestren el catálogo, añádelas a `src/app/api/revalidate/route.ts`.

@@ -4,6 +4,7 @@ import Chapter from '@/components/Chapter';
 import FloatingActions from '@/components/FloatingActions';
 import Footer from '@/components/Footer';
 import Masthead from '@/components/Masthead';
+import RegistroVisita from '@/components/RegistroVisita';
 import Toolbar from '@/components/Toolbar';
 import { ANCLA_INICIO } from '@/lib/anclas';
 import { CATALOGO_TAG, getCatalogo } from '@/lib/api';
@@ -38,6 +39,9 @@ export default async function CatalogoPage() {
       />
 
       <span id={ANCLA_INICIO} />
+
+      {/* No pinta nada: registra la visita desde el navegador. */}
+      <RegistroVisita />
 
       <Masthead
         subtitulo={catalogo.subtitulo}

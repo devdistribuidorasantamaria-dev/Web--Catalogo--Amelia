@@ -151,6 +151,26 @@ pasa a `next/image` para reservar el espacio sin salto de maquetado.
 - Sin logotipo subido (`logo_url: null`), `Masthead.tsx` escribe «Amelia · Boutique» en
   Cormorant como respaldo.
 
+## Analítica
+
+Tres eventos anónimos hacia `POST /api/eventos` del backend: `visita` al cargar el
+catálogo (`RegistroVisita.tsx`, un `useEffect` con guarda de ref para que StrictMode no
+cuente dos), y `agregar` / `consultar` en los botones de cada tarjeta.
+
+Todo pasa por `registrarEvento()` en `src/lib/analitica.ts`, que dispara y se olvida:
+
+- Usa `navigator.sendBeacon`, que sobrevive a que la pestaña se descargue — «Consultar»
+  se va a WhatsApp y en móvil eso puede matar una petición normal a mitad de camino.
+  `fetch` con `keepalive` es el respaldo.
+- El cuerpo va en `application/x-www-form-urlencoded`, no JSON: es un tipo «simple» para
+  CORS y así el navegador no manda un `OPTIONS` de preflight antes de cada evento.
+- Nunca lanza ni bloquea. Si la API está caída, el catálogo se comporta igual.
+
+Los botones **no cambian de comportamiento**: «Agregar» sigue metiendo la prenda en la
+lista y mostrando «Agregado ✓», y «Consultar» abre `wa.me` sin `preventDefault`.
+
+El tablero con los datos vive en el panel del backend, en **Analítica**.
+
 ## Imprimir
 
 El botón «Imprimir / PDF» usa `window.print()`. Las reglas `@media print` de `globals.css`
