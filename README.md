@@ -56,12 +56,14 @@ src/
     CartPanel.tsx           botón «Mi lista» + panel lateral con la consulta
     FloatingActions.tsx     columna fija: carrito sobre el contacto general
     WhatsAppButton.tsx      botón flotante de contacto
+    RegistroVisita.tsx      dispara el evento de visita; no pinta nada
     Footer.tsx
   lib/api.ts                fetch del catálogo con caché
   lib/anclas.ts             ids de las secciones (los usan barra y capítulos)
   lib/tema.ts               clave, tema por defecto y script anti-destello
   lib/carrito.tsx           store del carrito sobre localStorage
   lib/whatsapp.ts           armado de enlaces y mensajes wa.me
+  lib/analitica.ts          envío de los eventos anónimos al backend
   types/catalogo.ts
 ```
 
