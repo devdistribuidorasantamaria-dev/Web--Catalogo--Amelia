@@ -47,14 +47,6 @@ html[data-tema='claro'] {
 @layer base {
   html {
     color-scheme: dark;
-    /* Los enlaces de sección de la barra se desplazan en vez de saltar. */
-    scroll-behavior: smooth;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    html {
-      scroll-behavior: auto;
-    }
   }
 
   body {
@@ -81,21 +73,6 @@ html[data-tema='claro'] {
   @media (max-width: 480px) {
     .wrap {
       padding-inline: 1.25rem;
-    }
-  }
-
-  /*
-   * Destino de los enlaces de la barra: sin este margen el encabezado de la
-   * sección queda debajo de la barra fija (60px) al llegar.
-   */
-  .seccion-anclada {
-    scroll-margin-top: 80px;
-  }
-
-  /* Bajo 640px la barra usa dos líneas, así que tapa más. */
-  @media (max-width: 639px) {
-    .seccion-anclada {
-      scroll-margin-top: 116px;
     }
   }
 

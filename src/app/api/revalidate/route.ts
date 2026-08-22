@@ -23,11 +23,17 @@ export async function POST(request: Request) {
   // de la ruta, que es una entrada distinta. Hacen falta las dos.
   revalidateTag(CATALOGO_TAG, 'max');
   revalidatePath('/');
+  revalidatePath('/imprimir');
+  // Patrón de ruta + 'page': purga las páginas de todas las secciones de golpe,
+  // sin que el backend tenga que decir cuáles son. Cada una se regenera en su
+  // primera visita.
+  revalidatePath('/seccion/[slug]', 'page');
 
   // revalidateTag es stale-while-revalidate: la primera visita después de purgar
   // recibe la versión anterior y sólo entonces empieza la regeneración. Pedimos
   // la portada nosotros para absorber esa primera visita, de modo que quien
-  // acaba de guardar en el panel ya vea su cambio.
+  // acaba de guardar en el panel ya vea su cambio. Las demás secciones se
+  // regeneran cuando alguien entre en ellas.
   let calentado = false;
   try {
     const respuesta = await fetch(new URL('/', request.url), { cache: 'no-store' });

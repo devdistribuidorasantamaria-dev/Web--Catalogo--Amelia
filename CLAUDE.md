@@ -22,6 +22,17 @@ Lee `README.md` para el arranque, las variables y los detalles de maquetación.
   Excepción a los tokens: los controles que van **encima de una foto** (`N.º`, flechas,
   puntos) siguen en blanco/negro fijos, porque no dependen del fondo de la página.
 - Todo lo que no debe imprimirse lleva la clase `.no-print`.
+- **Una página por sección**: `/` es la primera, `/seccion/<slug>` las demás, y dentro de
+  cada una se pagina con `?pagina=N` (12 por página). El reparto de rutas, nombres y
+  numeración lo decide `navegacion()` en `src/lib/rutas.ts` — si agregas una vista que
+  liste secciones, sácala de ahí y no vuelvas a recorrer `catalogo.bloques` a mano, o el
+  orden y los «N.º» se te van a separar de la navegación.
+- El PDF del catálogo completo vive en `/imprimir`, aparte: las páginas de sección están
+  paginadas y no sirven para imprimir. Si cambias la rejilla o la tarjeta, comprueba las
+  dos vistas.
+- `?pagina=` es dato de petición: se lee **fuera** de `'use cache'` y se pasa como prop
+  (ver `VistaSeccion` → `RejillaSeccion`), con la rejilla dentro de un `<Suspense>` para que
+  el resto de la página se siga prerenderizando.
 - Los iconos de `src/app/` (`favicon.ico`, `icon.png`, `apple-icon.png`) se generan, no se
   editan a mano: `php scripts/generar-iconos.php <logotipo.png>`. Salen de la «A» del
   logotipo, no del wordmark entero, que a 16 px es ilegible.

@@ -28,11 +28,14 @@ Cache Components está habilitado (`cacheComponents: true`).
 - El panel de Laravel hace `POST /api/revalidate` con la cabecera `X-Revalidate-Secret`
   después de cada cambio.
 - Ese endpoint necesita **las dos** purgas: `revalidateTag('catalogo', 'max')` limpia las
-  cachés de datos y `revalidatePath('/')` limpia la HTML prerenderizada de la ruta, que es
+  cachés de datos y `revalidatePath(...)` limpia la HTML prerenderizada de la ruta, que es
   una entrada de caché distinta. Con sólo la etiqueta la página seguía sirviéndose vieja
-  hasta cumplir su hora.
+  hasta cumplir su hora. Se purgan `/`, `/imprimir` y —con el patrón de ruta más
+  `'page'`— `/seccion/[slug]`, que cubre las páginas de todas las secciones sin que el
+  backend tenga que enumerarlas.
 - Después de purgar, el endpoint pide `/` una vez para absorber la primera visita
-  (stale-while-revalidate), de modo que quien acaba de guardar ya vea su cambio.
+  (stale-while-revalidate), de modo que quien acaba de guardar ya vea su cambio. Las demás
+  secciones se regeneran cuando alguien entra en ellas.
 - Si el aviso falla, el catálogo se refresca solo dentro de la hora.
 
 Si la API está caída, `getCatalogo()` devuelve un catálogo vacío en lugar de tirar un 500:
@@ -44,25 +47,34 @@ la página sigue mostrando el masthead y el estado «Aún no hay prendas».
 src/
   app/
     layout.tsx              fuentes Cormorant + Jost (self-hosted), metadata
-    page.tsx                catálogo completo (server component)
+    page.tsx                portada: la primera sección del catálogo
+    seccion/[slug]/page.tsx las demás secciones, una página cada una
+    imprimir/page.tsx       catálogo entero en una sola página, para el PDF
+    not-found.tsx           404 con la piel del catálogo
     globals.css             paleta, filetes de la rejilla, reglas @media print
     favicon.ico             la «A» del logotipo, 16/32/48
     icon.png                512, para pestañas y marcadores
     apple-icon.png          180, para la pantalla de inicio de iOS
     api/revalidate/route.ts purga de caché que llama el backend
   components/
+    VistaSeccion.tsx        la página de una sección: barra, cabecera, rejilla
     Toolbar.tsx             barra fija: logotipo, secciones, tema, Imprimir/PDF
     BotonTema.tsx           conmuta negro / blanco y lo recuerda
     Masthead.tsx            logotipo y subtítulo
-    Chapter.tsx             una sección con su encabezado y su rejilla
+    EncabezadoSeccion.tsx   «SECCIÓN / Nombre» con su filete
+    RejillaSeccion.tsx      una página de prendas de la sección (cacheada)
+    RejillaCargando.tsx     hueco de la rejilla mientras se resuelve ?pagina=
+    Paginacion.tsx          enlaces de página (‹ Anterior · 01 02 03 · Siguiente ›)
     ProductCard.tsx         tarjeta: carrusel, tallas, «Agregar» y «Consultar»
     CartPanel.tsx           botón «Mi lista» + panel lateral con la consulta
     FloatingActions.tsx     columna fija: carrito sobre el contacto general
     WhatsAppButton.tsx      botón flotante de contacto
+    BarraImpresion.tsx      barra de /imprimir; abre el diálogo al llegar
     RegistroVisita.tsx      dispara el evento de visita; no pinta nada
     Footer.tsx
   lib/api.ts                fetch del catálogo con caché
-  lib/anclas.ts             ids de las secciones (los usan barra y capítulos)
+  lib/rutas.ts              navegación: una entrada (y una página) por sección
+  lib/paginacion.ts         prendas por página, cuenta de páginas y ?pagina=
   lib/tema.ts               clave, tema por defecto y script anti-destello
   lib/carrito.tsx           store del carrito sobre localStorage
   lib/whatsapp.ts           armado de enlaces y mensajes wa.me
@@ -71,6 +83,60 @@ src/
 scripts/generar-iconos.php  recorta la «A» del logotipo y escribe los iconos
 ```
 
+## Rutas
+
+Una página por sección. Antes el catálogo era una sola página con todas las secciones
+apiladas, y con unas pocas prendas por sección ya se volvía un scroll interminable.
+
+| Ruta                    | Qué es                                                                    |
+| ----------------------- | ------------------------------------------------------------------------- |
+| `/`                     | La **primera** sección del catálogo, la que el panel deja arriba.          |
+| `/seccion/<slug>`       | Las demás secciones. La primera redirige (307) a `/`, para no tener dos URLs con lo mismo. |
+| `/seccion/otras-prendas`| Las prendas sin sección, si hay alguna.                                   |
+| `/imprimir`             | El catálogo entero en una página, sin paginar, y abre el diálogo de impresión. |
+| `?pagina=N`             | Página dentro de la sección. La 1 no lleva parámetro.                      |
+
+- La barra superior es la navegación: un enlace por sección y la abierta marcada con
+  `aria-current="page"` y el filete de abajo. Ya no son anclas (`#seccion-…`) a una página
+  larga, así que no queda nada de `scroll-margin` ni de saltos suaves.
+- **El bloque sin sección va al final.** La API lo manda primero (así iba en el maquetado
+  de una sola página, sin encabezado), pero con una página por sección un cajón de sastre
+  no puede ser la portada del catálogo. El reordenamiento vive en `navegacion()`
+  (`src/lib/rutas.ts`), que es también quien reparte los `href` y la numeración.
+- Las secciones que existen al construir se prerenderizan (`generateStaticParams`); una
+  creada después se resuelve en su primera visita.
+
+## Paginación
+
+Cada sección pagina por su cuenta, de **12 en 12** (`PRENDAS_POR_PAGINA` en
+`src/lib/paginacion.ts`, cuatro filas de la rejilla de escritorio). Una sección de 12
+prendas o menos no muestra controles.
+
+- La página vive en la URL (`?pagina=2`), así que se puede compartir, marcar y volver atrás
+  con el botón del navegador. Los controles son **enlaces**, no botones con estado.
+- `paginaValida()` acota lo que venga: `?pagina=99` cae en la última, y `abc` o `-3` en la
+  primera. La URL la escribe cualquiera.
+- La numeración «N.º 01, 02…» **no se reinicia** ni por página ni por sección: sigue siendo
+  continua en todo el catálogo, y `/imprimir` usa la misma cuenta.
+- El corte se hace al renderizar, sobre el catálogo completo que ya trae `getCatalogo()`.
+  No hay endpoint paginado ni una petición por página.
+- Cómo encaja con Cache Components: `?pagina=` es dato de petición, así que la rejilla vive
+  dentro de un `<Suspense>` (`RejillaCargando` de relleno) y todo lo demás —barra, cabecera,
+  encabezado de la sección— se prerenderiza. `RejillaSeccion` recibe el número ya resuelto
+  como prop porque dentro de `'use cache'` no se puede tocar `searchParams`; así la HTML de
+  cada sección + página se cachea con la etiqueta `catalogo` y el panel la purga igual.
+  Sin esa frontera, leer `searchParams` obliga a toda la ruta a resolverse en cada visita
+  (el aviso `blocking-route` de Next 16).
+
+## Impresión
+
+«Imprimir / PDF» de la barra no imprime la sección abierta: lleva a **`/imprimir`**, que
+arma todas las secciones seguidas, sin paginar, y abre el diálogo del navegador al llegar
+(con medio segundo de margen, para que las fuentes y las primeras fotos hayan pintado).
+El cliente sigue teniendo un PDF único del catálogo completo, que es como lo reparte.
+
+La barra de esa vista lleva `.no-print`, igual que todo lo que no debe salir en papel.
+
 ## Detalles de maquetación
 
 - **Filetes de la rejilla**: cada tarjeta lleva su `outline: 1px` y entre ellas hay un hueco
@@ -78,16 +144,15 @@ scripts/generar-iconos.php  recorta la «A» del logotipo y escribe los iconos
   fondo de la rejilla y dejaba que asomara por los huecos, pero eso deja bloques grises
   cuando la última fila está incompleta.) Al imprimir el hueco pasa a 0 para no desperdiciar
   papel.
-- **Numeración** «N.º 01, 02…» es continua a través de las secciones.
+- **Numeración** «N.º 01, 02…» es continua en todo el catálogo: no se reinicia por sección
+  ni por página (ver «Paginación»).
 - **Barra superior**: va de filo a filo (no usa `wrap`, a diferencia del catálogo, que sigue
   centrado en 1120px), con el logotipo pegado al borde izquierdo y los botones al derecho.
-  Lleva un enlace por sección con prendas, que salta a su `id` (`seccion-<slug>`, armado en
-  `src/lib/anclas.ts`). El salto es suave salvo con `prefers-reduced-motion`, y
-  `.seccion-anclada` deja el hueco de la barra fija: 80px, 116px bajo 640px, donde la barra
-  pasa a dos líneas para que las secciones no queden recortadas.
-- `anclaSeccion()` vive en `lib/`, no en `Toolbar.tsx`: `Chapter` es un componente de
-  servidor y llamar a una función exportada desde un módulo `'use client'` revienta en
-  ejecución («Attempted to call anclaSeccion() from the server»). No lo ve ni tsc ni eslint.
+  Lleva un enlace por sección con prendas y marca la abierta. Bajo 640px pasa a dos líneas
+  para que las secciones no queden recortadas.
+- `Toolbar` es un componente de **servidor**: la sección abierta llega como prop, no de
+  `usePathname()`, así que no manda nada de JavaScript al navegador. `BotonTema`, que sí es
+  de cliente, se importa desde ahí sin problema.
 - **Imágenes locales**: Next 16 bloquea optimizar imágenes de hosts locales.
   `next.config.ts` activa `dangerouslyAllowLocalIP` sólo cuando el host de la API es local.
 
@@ -185,9 +250,13 @@ la pena añadirle una para esto.
 
 ## Analítica
 
-Tres eventos anónimos hacia `POST /api/eventos` del backend: `visita` al cargar el
-catálogo (`RegistroVisita.tsx`, un `useEffect` con guarda de ref para que StrictMode no
-cuente dos), y `agregar` / `consultar` en los botones de cada tarjeta.
+Tres eventos anónimos hacia `POST /api/eventos` del backend: `visita` al abrir el catálogo,
+y `agregar` / `consultar` en los botones de cada tarjeta.
+
+Una visita es **abrir el catálogo, no abrir una sección**: con una página por sección,
+pasear por la barra dispararía una visita por clic e inflaría la cuenta. `RegistroVisita.tsx`
+marca la visita en `sessionStorage` (`amelia_visita_v1`), así que sólo cuenta la primera de
+la pestaña; eso cubre además las recargas y el doble montaje de StrictMode en desarrollo.
 
 Todo pasa por `registrarEvento()` en `src/lib/analitica.ts`, que dispara y se olvida:
 
