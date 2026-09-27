@@ -23,10 +23,18 @@ Lee `README.md` para el arranque, las variables y los detalles de maquetación.
   puntos) siguen en blanco/negro fijos, porque no dependen del fondo de la página.
 - Todo lo que no debe imprimirse lleva la clase `.no-print`.
 - **Una página por sección**: `/` es la primera, `/seccion/<slug>` las demás, y dentro de
-  cada una se pagina con `?pagina=N` (12 por página). El reparto de rutas, nombres y
-  numeración lo decide `navegacion()` en `src/lib/rutas.ts` — si agregas una vista que
-  liste secciones, sácala de ahí y no vuelvas a recorrer `catalogo.bloques` a mano, o el
-  orden y los «N.º» se te van a separar de la navegación.
+  cada una se pagina con `?pagina=N` (12 por página, en una rejilla de 2 ó 3 columnas
+  — `.catalog-grid--panel` — porque el panel de filtros ocupa la columna izquierda).
+  El reparto de rutas, nombres y numeración lo decide `navegacion()` en
+  `src/lib/rutas.ts` — si agregas una vista que liste secciones, sácala de ahí y no
+  vuelvas a recorrer `catalogo.bloques` a mano, o el orden y los «N.º» se te van a
+  separar de la navegación.
+- **Filtros de sección** (precio y talla, nada más): viven en la URL
+  (`?precio_min=&precio_max=&tallas=S,M`) junto al `?pagina=`, se leen y validan en el
+  servidor con `src/lib/filtros.ts` y se aplican **antes** de paginar, para que la cuenta de
+  páginas sea la de las prendas que quedan. `PanelFiltros.tsx` es sólo la interfaz: no
+  guarda el filtro, sólo el precio mientras se arrastra el deslizador, y navega. Si agregas
+  otro criterio, añádelo a `Filtros`/`consultaFiltros()` y no leas `searchParams` sueltos.
 - El PDF del catálogo completo vive en `/imprimir`, aparte: las páginas de sección están
   paginadas y no sirven para imprimir. Si cambias la rejilla o la tarjeta, comprueba las
   dos vistas.
@@ -39,6 +47,10 @@ Lee `README.md` para el arranque, las variables y los detalles de maquetación.
 - Datos del catálogo: siempre por `getCatalogo()` en `src/lib/api.ts` (cachea con
   `'use cache'` + `cacheTag('catalogo')`). Si agregas otro fetch cacheado, etiquétalo con
   `CATALOGO_TAG` para que el backend también lo purgue.
+- Redes sociales del pie: la dirección viene de la API (`catalogo.redes`, sólo las que el
+  panel tiene cargadas) y el **logotipo vive aquí**, en `IconoRed.tsx`, como trazo SVG
+  monocromo con `fill-current`. Nada de logos en color ni de SVG traídos de fuera. Si el
+  backend agrega una red, agrega su trazo o el pie la ignora (`tieneLogotipo()`).
 - Analítica: los eventos salen por `registrarEvento()` de `src/lib/analitica.ts`, nunca con
   un `fetch` suelto. Dispara y se olvida — nada de `await`, de estado ni de `preventDefault`
   en los botones que ya hacían algo. Si agregas un punto de contacto nuevo, añade su tipo

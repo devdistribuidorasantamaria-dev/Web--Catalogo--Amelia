@@ -14,6 +14,7 @@ const CATALOGO_VACIO: Catalogo = {
   logo_alto: null,
   whatsapp_url: null,
   whatsapp_numero: null,
+  redes: [],
   total_prendas: 0,
   bloques: [],
 };

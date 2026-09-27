@@ -69,7 +69,7 @@ export default async function ImprimirPage() {
         )}
       </main>
 
-      <Footer />
+      <Footer redes={catalogo.redes} />
     </>
   );
 }

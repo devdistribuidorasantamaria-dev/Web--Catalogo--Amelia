@@ -23,6 +23,14 @@ export type Bloque = {
   prendas: Prenda[];
 };
 
+/** Red social con dirección guardada en el panel. El logotipo vive aquí. */
+export type RedSocial = {
+  /** Identificador de la red: decide qué logotipo se pinta. */
+  red: 'facebook' | 'instagram' | 'tiktok';
+  nombre: string;
+  url: string;
+};
+
 export type Catalogo = {
   subtitulo: string;
   /** Logotipo subido en el panel; null = se escribe el nombre en Cormorant. */
@@ -34,6 +42,8 @@ export type Catalogo = {
   whatsapp_url: string | null;
   /** Número en dígitos, para armar mensajes propios (prenda, carrito). */
   whatsapp_numero: string | null;
+  /** Sólo las redes con dirección; vacío = no se pinta nada en el pie. */
+  redes: RedSocial[];
   total_prendas: number;
   bloques: Bloque[];
 };
