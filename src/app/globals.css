@@ -125,6 +125,197 @@ html[data-tema='claro'] {
       grid-template-columns: minmax(0, 1fr);
     }
   }
+
+  /*
+   * Sección con panel de filtros: el panel a la izquierda, fijo mientras se
+   * desplaza la rejilla, y las prendas a la derecha. Por debajo de 900px no
+   * caben lado a lado: el panel se va arriba y se pliega con su botón.
+   */
+  .disposicion-filtros {
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    gap: 28px;
+    align-items: start;
+  }
+
+  /*
+   * En pantallas anchas el cuerpo se sale de los 1120px de `.wrap`: el panel se
+   * va contra el margen izquierdo y el ancho que sobra se lo queda la rejilla.
+   * El resto de la página (cabecera, encabezado de sección, paginación) sigue
+   * centrado en `.wrap`, que es lo que le da el aire editorial.
+   *
+   * El margen negativo sale del centro del `.wrap` (su 50% es el centro de la
+   * pantalla), así que basta restarle media anchura para centrar el bloque
+   * ancho. Los 5rem de holgura dejan sitio de sobra para la barra de
+   * desplazamiento que `100vw` no descuenta.
+   */
+  @media (min-width: 1200px) {
+    .disposicion-filtros {
+      --ancho-cuerpo: min(calc(100vw - 5rem), 1560px);
+      width: var(--ancho-cuerpo);
+      margin-inline: calc(50% - var(--ancho-cuerpo) / 2);
+    }
+  }
+
+  .panel-filtros {
+    position: sticky;
+    /* Debajo de la barra superior (68px) y con aire. */
+    top: 88px;
+  }
+
+  /* El botón de plegar sólo existe en pantallas angostas. */
+  .panel-filtros__pliegue {
+    display: none;
+  }
+
+  @media (max-width: 899px) {
+    .disposicion-filtros {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 20px;
+    }
+
+    .panel-filtros {
+      position: static;
+    }
+
+    .panel-filtros__pliegue {
+      display: inline-flex;
+    }
+
+    .panel-filtros__cuerpo[data-abierto='false'] {
+      display: none;
+    }
+  }
+
+  /*
+   * Rejilla dentro de la sección con panel: una columna menos que sin él, para
+   * que la foto no se quede en una estampilla. La vista de impresión usa
+   * `.catalog-grid` a secas y no entra por aquí.
+   */
+  .catalog-grid--panel {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (min-width: 1180px) {
+    .catalog-grid--panel {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  /* Con el cuerpo ya ensanchado, una cuarta columna antes que tarjetas enormes. */
+  @media (min-width: 1400px) {
+    .catalog-grid--panel {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 620px) {
+    .catalog-grid--panel {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  /*
+   * Deslizador de precio: dos <input type=range> encima del mismo filete. El
+   * tramo elegido se pinta con `.filtro-rango__activo`, cuyo left/right los
+   * calcula el panel. Los tiradores son cuadrados, como los botones de talla:
+   * el catálogo no tiene una sola esquina redonda.
+   */
+  .filtro-rango {
+    position: relative;
+    height: 22px;
+  }
+
+  .filtro-rango::before {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    top: 50%;
+    height: 1px;
+    transform: translateY(-50%);
+    background: var(--color-hairline);
+  }
+
+  .filtro-rango__activo {
+    position: absolute;
+    top: 50%;
+    height: 1px;
+    transform: translateY(-50%);
+    background: var(--color-ink);
+  }
+
+  .filtro-rango input[type='range'] {
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    width: 100%;
+    height: 22px;
+    margin: 0;
+    background: transparent;
+    -webkit-appearance: none;
+    appearance: none;
+    /* El carril no debe robarle el clic al otro deslizador; sólo el tirador. */
+    pointer-events: none;
+  }
+
+  .filtro-rango input[type='range']:focus-visible {
+    outline: none;
+  }
+
+  .filtro-rango input[type='range']::-webkit-slider-runnable-track {
+    height: 22px;
+    background: transparent;
+  }
+
+  .filtro-rango input[type='range']::-moz-range-track {
+    height: 22px;
+    background: transparent;
+  }
+
+  .filtro-rango input[type='range']::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    pointer-events: auto;
+    height: 12px;
+    width: 12px;
+    margin-top: 5px;
+    border: 1px solid var(--color-paper);
+    border-radius: 0;
+    background: var(--color-ink);
+    cursor: pointer;
+  }
+
+  .filtro-rango input[type='range']::-moz-range-thumb {
+    pointer-events: auto;
+    height: 12px;
+    width: 12px;
+    border: 1px solid var(--color-paper);
+    border-radius: 0;
+    background: var(--color-ink);
+    cursor: pointer;
+  }
+
+  .filtro-rango input[type='range']:focus-visible::-webkit-slider-thumb {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 2px;
+  }
+
+  .filtro-rango input[type='range']:focus-visible::-moz-range-thumb {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 2px;
+  }
+
+  /* Los números de precio se escriben, no se pulsan: fuera las flechitas. */
+  .panel-filtros input[type='number']::-webkit-outer-spin-button,
+  .panel-filtros input[type='number']::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  .panel-filtros input[type='number'] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
 }
 
 /* Marca de agua para prendas sin foto. */

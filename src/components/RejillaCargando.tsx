@@ -7,8 +7,8 @@ import { PRENDAS_POR_PAGINA } from '@/lib/paginacion';
  */
 export default function RejillaCargando() {
   return (
-    <div className="catalog-grid" aria-hidden>
-      {Array.from({ length: Math.min(3, PRENDAS_POR_PAGINA) }, (_, i) => (
+    <div className="catalog-grid catalog-grid--panel" aria-hidden>
+      {Array.from({ length: Math.min(2, PRENDAS_POR_PAGINA) }, (_, i) => (
         <div key={i} className="catalog-card flex animate-pulse flex-col bg-paper">
           <div className="aspect-3/4 bg-panel" />
           <div className="flex flex-col gap-2.5 px-[18px] pb-[22px] pt-[18px]">

@@ -12,6 +12,8 @@ type Props = {
   total: number;
   /** Ruta de la sección: `/` o `/seccion/<slug>`. */
   href: string;
+  /** Query de los filtros puestos, sin `?`; vacía si no hay ninguno. */
+  consulta?: string;
   nombreSeccion: string;
 };
 
@@ -58,6 +60,7 @@ export default function Paginacion({
   hasta,
   total,
   href,
+  consulta = '',
   nombreSeccion,
 }: Props) {
   return (
@@ -68,7 +71,7 @@ export default function Paginacion({
       {/* En móvil, con muchas páginas, la fila envuelve en vez de desbordarse. */}
       <div className="flex flex-wrap items-center justify-center gap-1">
         {pagina > 1 ? (
-          <Link href={urlPagina(href, pagina - 1)} rel="prev" className={`${FLECHA} text-muted hover:text-ink`}>
+          <Link href={urlPagina(href, pagina - 1, consulta)} rel="prev" className={`${FLECHA} text-muted hover:text-ink`}>
             ‹ Anterior
           </Link>
         ) : (
@@ -95,7 +98,7 @@ export default function Paginacion({
           ) : (
             <Link
               key={n}
-              href={urlPagina(href, n)}
+              href={urlPagina(href, n, consulta)}
               aria-label={`Página ${n}`}
               className="flex h-9 min-w-9 items-center justify-center border-b border-b-transparent px-2
                          font-serif text-[17px] italic leading-none text-muted transition-colors hover:text-ink
@@ -107,7 +110,7 @@ export default function Paginacion({
         )}
 
         {pagina < paginas ? (
-          <Link href={urlPagina(href, pagina + 1)} rel="next" className={`${FLECHA} text-muted hover:text-ink`}>
+          <Link href={urlPagina(href, pagina + 1, consulta)} rel="next" className={`${FLECHA} text-muted hover:text-ink`}>
             Siguiente ›
           </Link>
         ) : (

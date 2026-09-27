@@ -72,9 +72,16 @@ export function navegacion(bloques: Bloque[]): EntradaSeccion[] {
   });
 }
 
-/** URL de una página concreta de la sección. La primera no lleva `?pagina=`. */
-export const urlPagina = (href: string, pagina: number) =>
-  pagina <= 1 ? href : `${href}?pagina=${pagina}`;
+/**
+ * URL de una página concreta de la sección. La primera no lleva `?pagina=`, y
+ * `consulta` (los filtros, sin `?`) se conserva en todas: cambiar de página no
+ * puede perder el filtro puesto.
+ */
+export const urlPagina = (href: string, pagina: number, consulta = '') => {
+  const query = [consulta, pagina <= 1 ? '' : `pagina=${pagina}`].filter(Boolean).join('&');
+
+  return query ? `${href}?${query}` : href;
+};
 
 /** Correlativo (base 1) de la primera prenda de la página. */
 export const primeraDeLaPagina = (pagina: number) => (pagina - 1) * PRENDAS_POR_PAGINA;
